@@ -1,6 +1,6 @@
 const headers = ["No","Grup Kegiatan","Daftar Aktivitas / Kegiatan","Potensi Risiko / Risiko Melekat","Jenis Kejadian","Pemilik Risiko","Alat mitigasi Risiko"];
 let originalData=[],filteredData=[];
-const sheetUrl='https://script.google.com/macros/s/AKfycbxbfh5Ud5JB0f2cn7lQYQSJMwwT8p2ioDItdYXwI80wnZZ76zR3QW2SkVYlVCeU2Pyq/exec';
+const sheetUrl='https://script.google.com/macros/s/AKfycbwZnBnGaYXqVJ0A_O8FfdjIIygjqC2YFehglHPAT_cPWC6QbBOkwPQUHHY_syS06CJj/exec';
 
 async function fetchData(){
   try{
@@ -21,12 +21,14 @@ searchInput.addEventListener('input',e=>{
   filteredData=originalData.filter(r=>r.some(c=>String(c??'').toLowerCase().includes(k)));
   render();
 });
+/* ---------- PRINT PDF (no about:blank) ---------- */
 pdfBtn.onclick=()=>{
   const style=`
     @page{size:A4 landscape;margin:1cm}
+    @bottom-center{content:none}              /* hapus footer bawaan browser */
     body{font-family:Calibri;font-size:10px}
     h1{font-size:16px;margin:0 0 6px}
-    footer{font-size:10px;color:#555;margin-top:10px;text-align:center}
+    footer{font-size:10px;color:#555;text-align:center;margin-top:10px}
     table{width:100%;border-collapse:collapse}
     th,td{border:1px solid #333;padding:4px}
     th{background:#007bff;color:#fff}
@@ -36,23 +38,27 @@ pdfBtn.onclick=()=>{
   const rows=filteredData.map(r=>'<tr>'+r.map(c=>`<td>${c??''}</td>`).join('')+'</tr>').join('');
   const html=`
     <html>
-    <head><style>${style}</style></head>
-    <body onload="window.print()">
-      <h1>${title}</h1>
-      <table>${head}${rows}</table>
-      <footer>© 2025 German Sparkassenstiftung & Perbarindo DPD Jateng. All rights reserved.</footer>
-    </body>
+      <head>
+        <title>Rekap Risiko</title>
+        <style>${style}</style>
+      </head>
+      <body onload="window.print()">
+        <h1>${title}</h1>
+        <table>${head}${rows}</table>
+        <footer>© 2025 German Sparkassenstiftung & Perbarindo DPD Jateng. All rights reserved.</footer>
+      </body>
     </html>`;
   const w=window.open('','_blank','width=900,height=600');
   w.document.write(html);
   w.document.close();
   w.focus();
 };
+/* ---------- SCROLL BARIS TERATAS / TERBAWAH ---------- */
 toTop.onclick   =()=> document.querySelector('.table-wrapper').scrollTop = 0;
-toBottom.onclick=()=> {
+toBottom.onclick=()=>{
   const wrap=document.querySelector('.table-wrapper');
   wrap.scrollTop=wrap.scrollHeight;
 };
+/* ---------- INITIAL & AUTO-REFRESH ---------- */
 fetchData();
 setInterval(fetchData,15000);
-
