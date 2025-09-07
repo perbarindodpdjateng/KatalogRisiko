@@ -22,22 +22,36 @@ searchInput.addEventListener('input',e=>{
   render();
 });
 pdfBtn.onclick=()=>{
-  const style=`<style>body{font-family:Calibri}h1{font-size:16px;margin-bottom:6px}footer{font-size:10px;color:#555;margin-top:10px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #333;padding:4px}th{background:#007bff;color:#fff}</style>`;
+  const style=`
+    @page{size:A4 landscape;margin:1cm}
+    body{font-family:Calibri;font-size:10px}
+    h1{font-size:16px;margin:0 0 6px}
+    footer{font-size:10px;color:#555;margin-top:10px;text-align:center}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #333;padding:4px}
+    th{background:#007bff;color:#fff}
+  `;
   const title=document.getElementById('docTitle').textContent;
   const head='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>';
   const rows=filteredData.map(r=>'<tr>'+r.map(c=>`<td>${c??''}</td>`).join('')+'</tr>').join('');
-  const html=`<html><head>${style}</head><body onload="window.print()">
-    <h1>${title}</h1>
-    <table>${head}${rows}</table>
-    <footer>© 2025 German Sparkassenstiftung & Perbarindo DPD Jateng. All rights reserved.</footer>
-  </body></html>`;
-  const w=window.open('','','width=900,height=600');
+  const html=`
+    <html>
+    <head><style>${style}</style></head>
+    <body onload="window.print()">
+      <h1>${title}</h1>
+      <table>${head}${rows}</table>
+      <footer>© 2025 German Sparkassenstiftung & Perbarindo DPD Jateng. All rights reserved.</footer>
+    </body>
+    </html>`;
+  const w=window.open('','_blank','width=900,height=600');
   w.document.write(html);
   w.document.close();
   w.focus();
 };
-toTop.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
-toBottom.onclick=()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
-
+toTop.onclick   =()=> document.querySelector('.table-wrapper').scrollTop = 0;
+toBottom.onclick=()=> {
+  const wrap=document.querySelector('.table-wrapper');
+  wrap.scrollTop=wrap.scrollHeight;
+};
 fetchData();
 setInterval(fetchData,15000);
