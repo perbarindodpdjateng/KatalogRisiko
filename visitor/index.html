@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Counter Ringan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{--c:#76b5c5;--bg:#fff}
+  body{margin:0;font:14px/1.4 Calibri,Segoe UI,sans-serif;background:var(--bg);color:#222;-webkit-text-size-adjust:100%}
+  h1{margin:.3em 0 .5em;font-size:1.3em;text-align:center;color:var(--c)}
+  .grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px}
+  .card{flex:1 1 140px;max-width:160px;background:var(--bg);border:1px solid var(--c);border-radius:6px;padding:8px 6px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .card b{display:block;font-size:1.05em;margin-bottom:4px;color:var(--c)}
+  .card img{height:9px;margin:0 1px}
+</style>
+</head>
+<body>
+
+<h1>Statistik Kunjungan</h1>
+
+<div class="grid">
+  <div class="card"><b>Beranda Katalog Risiko</b><span>1 261 901</span></div>
+  <div class="card"><b>Front Liner</b><span>1 261 903</span></div>
+  <div class="card"><b>Penyelamatan Kredit</b><span>1 261 908</span></div>
+  <div class="card"><b>Admin Kredit</b><span>1 261 904</span></div>
+  <div class="card"><b>Marketing</b><span>1 261 905</span></div>
+  <div class="card"><b>Umum & Keuangan</b><span>1 292 774</span></div>
+  <div class="card"><b>Analisa Kredit</b><span>1 294 224</span></div>
+  <div class="card"><b>SDM</b><span>1 294 225</span></div>
+  <div class="card"><b>Kepatuhan & Audit</b><span>1 294 226</span></div>
+  <div class="card"><b>KPR Siap Huni</b><span>1 294 227</span></div>
+  <div class="card"><b>Kredit Kendaraan Bermotor</b><span>1 294 228</span></div>
+  <div class="card"><b>Antar Bank Aktiva</b><span>1 294 230</span></div>
+  <div class="card"><b>Deposito</b><span>1 294 231</span></div>
+  <div class="card"><b>Kredit Karyawan</b><span>1 294 232</span></div>
+  <div class="card"><b>Tabungan Reguler</b><span>1 294 233</span></div>
+  <div class="card"><b>Simpanan Hari Raya</b><span>1 294 234</span></div>
+</div>
+
+<!-- Opsional: animasi titik (CSS-only, tanpa JS) -->
+<style>
+@keyframes blink{50%{opacity:.2}}
+.card span::after{content:"";display:inline-block;width:6px;height:6px;background:var(--c);border-radius:50%;margin-left:4px;animation:blink 1.2s infinite}
+</style>
+
+</body>
+</html>
