@@ -25,3 +25,15 @@ td.sticky-col,th.sticky-col{position:sticky;left:0;z-index:1;background:#f0f0f0}
 tr:nth-child(even) td{background:var(--grey)}
 .skeleton{height:18px;background:linear-gradient(90deg,#eee 40%,#ddd 50%,#eee 60%);background-size:200% 100%;animation:shimmer 1.2s infinite}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* tombol kembali ke menu */
+#backBtn{
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:4px;
+  background:var(--grey);
+  color:var(--text);
+  text-decoration:none;
+  font-size:.8rem;
+}
+#backBtn:hover{background:#e4e4e4}
