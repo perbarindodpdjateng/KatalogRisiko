@@ -1,6 +1,6 @@
 const headers = ["No","Grup Kegiatan","Daftar Aktivitas / Kegiatan","Potensi Risiko / Risiko Melekat","Jenis Kejadian","Pemilik Risiko","Alat mitigasi Risiko"];
 let originalData=[],filteredData=[];
-const sheetUrl='https://script.google.com/macros/s/AKfycbxE4c9umA07jbX9dOg97AW6KWU2KN084-3QH4crhS0AgF7KVsSTvwrEtFI3pYCDub9Y/exec';
+const sheetUrl='https://script.google.com/macros/s/AKfycbywAT3_TSuVn_Z7TfMCAPWJl30CVRpTzDabJs2X9HTT7_gGnEEYY9GUbxImfe6hmYIX/exec';
 
 async function fetchData(){
   try{
@@ -62,5 +62,6 @@ toBottom.onclick=()=>{
 /* ---------- INITIAL & AUTO-REFRESH ---------- */
 fetchData();
 setInterval(fetchData,15000);
+
 
 
