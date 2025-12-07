@@ -4,11 +4,59 @@
   <meta charset="utf-8"/>
   <title>Rekap Risiko</title>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    :root{
+      --primary:#007bff;
+      --grey:#f5f5f5;
+      --text:#222;
+      --border:#ddd;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:12px;
+    }
+    body{margin:0;padding:0 8px 40px;color:var(--text);background:#fff}
+    header{padding:12px 0;border-bottom:2px solid var(--primary)}
+    header h1{margin:0;font-size:14px}
+    header p{margin:2px 0;font-size:11px;color:#555}
+
+    #toolbar{
+      position:sticky;top:0;z-index:10;
+      display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+      padding:6px;background:#fff;border-bottom:1px solid var(--border);
+    }
+    #toolbar input{flex:1 1 200px;padding:4px 6px;border:1px solid var(--border);border-radius:3px;font-size:12px}
+    button{padding:4px 8px;border:1px solid var(--border);border-radius:3px;background:var(--grey);cursor:pointer;font-size:12px}
+    button:hover{background:#e4e4e4}
+
+    .table-wrapper{overflow:auto;max-height:75vh;border:1px solid var(--border);border-radius:4px;margin-top:6px}
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    th,td{padding:4px 6px;border:1px solid var(--border);font-size:12px;vertical-align:top;white-space:normal;word-break:break-word;line-height:1.3}
+    th{background:var(--primary);color:#fff;position:sticky;top:0;z-index:2}
+    td.sticky-col,th.sticky-col{position:sticky;left:0;z-index:1;background:#f0f0f0}
+    tr:nth-child(even) td{background:var(--grey)}
+
+    col.col1{width:4ch}
+    col.col2{width:15ch}
+    col.col5{width:15ch}
+    col.col6{width:15ch}
+
+    .skeleton{height:14px;background:linear-gradient(90deg,#eee 40%,#ddd 50%,#eee 60%);background-size:200% 100%;animation:shimmer 1s infinite}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+    #backBtn{
+      padding:4px 8px;
+      border:1px solid var(--border);
+      border-radius:3px;
+      background:var(--grey);
+      color:var(--text);
+      text-decoration:none;
+      font-size:12px;
+    }
+    #backBtn:hover{background:#e4e4e4}
+  </style>
 </head>
 <body>
   <header>
-    <h1 id="docTitle">02 Katalog Risiko Penagihan Penyelamatan Kredit</h1>
+    <h1 id="docTitle">01 Katalog Risiko Front Liner</h1>
     <p>German Sparkassenstiftung - Perbarindo DPD Jateng</p>
   </header>
 
@@ -18,22 +66,170 @@
     <button id="pdfBtn">📄 PDF</button>
     <button id="toTop">⬆️</button>
     <button id="toBottom">⬇️</button>
-    <!-- di dalam <div id="toolbar"> … </div> -->
     <a id="backBtn" href="https://www.perbarindodpdjateng.or.id/kr" target="_blank" title="Kembali ke Menu">← Menu</a>
   </div>
-  
+
   <div class="table-wrapper">
     <table id="dataTable">
+      <colgroup>
+        <col class="col1">
+        <col class="col2">
+        <col>
+        <col>
+        <col class="col5">
+        <col class="col6">
+        <col>
+      </colgroup>
       <thead id="tableHead"></thead>
       <tbody id="tableBody"><tr><td colspan="7" class="skeleton"></td></tr></tbody>
     </table>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    /* ========== CONFIG ========== */
+    const sheetUrl = 'https://script.google.com/macros/s/AKfycbxE4c9umA07jbX9dOg97AW6KWU2KN084-3QH4crhS0AgF7KVsSTvwrEtFI3pYCDub9Y/exec';
+    let originalData=[], filteredData=[];
+
+    const COL_CH = [4, 15, 20, 20, 20, 20, 0];
+    const PX_PER_CH = 8;
+    const PX_TO_MM = 0.2645;
+    const A4L_MM = 297;
+    const MARGIN = 6;
+
+    function ch2mm(ch) { return ch * PX_PER_CH * PX_TO_MM; }
+
+    function buildColWidth(headerRow) {
+      const dynamicCount = headerRow.length - COL_CH.length;
+      const dynamicWidth = (A4L_MM - 2*MARGIN - COL_CH.reduce((a,b)=>a+b,0)*PX_PER_CH*PX_TO_MM) / Math.max(1,dynamicCount);
+      return headerRow.map((_,i)=>{
+        const ch = COL_CH[i] || 0;
+        return ch ? ch2mm(ch) : dynamicWidth;
+      });
+    }
+
+    const $=id=>document.getElementById(id);
+
+    function sanitize(arr){
+      return arr.map(r=>
+        r.map(c=>
+          String(c??'')
+            .replace(/^[\s\uFEFF\xA0\-\•●■▪▫–—]+/g,'')
+            .replace(/\r/g,' ')
+            .replace(/\n+/g,' ')
+            .replace(/\s{2,}/g,' ')
+            .trim()
+        )
+      ).filter(r=>r.length);
+    }
+
+    async function fetchData(){
+      try{
+        const res = await fetch(sheetUrl, {cache:'no-store'});
+        const d   = await res.json();
+        originalData = sanitize(d||[]);   // <-- gunakan semua, baris-0 jadi header
+        filteredData = [...originalData];
+        render();
+      }catch(e){
+        console.error(e);
+        $('rowCount').textContent='gagal memuat';
+      }
+    }
+
+    function render(){
+      const headerRow = originalData[0] || [];
+      $('rowCount').textContent=`Jml Data : ${originalData.length-1}`;
+      $('tableHead').innerHTML='<tr>'+
+        headerRow.map((h,i)=>`<th class="${i===0?'sticky-col':''}">${h}</th>`).join('')+
+      '</tr>';
+
+      $('tableBody').innerHTML=filteredData.slice(1).map(r=>
+        '<tr>'+r.map((c,i)=>{
+          const pad='                                                     ';
+          const txt=String(c??'')+pad;
+          return`<td class="${i===0?'sticky-col':''}">${txt}</td>`;
+        }).join('')+'</tr>'
+      ).join('');
+    }
+
+    $('searchInput').addEventListener('input',e=>{
+      const k=e.target.value.toLowerCase();
+      filteredData=originalData.filter(r=>r.some(c=>String(c??'').toLowerCase().includes(k)));
+      render();
+    });
+
+    async function downloadPDF(){
+      const {jsPDF} = window.jspdf;
+      const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+      const title = $('docTitle').textContent.trim();
+      const fileName = `${title.replace(/[^a-z0-9]/gi,'_').toLowerCase()}_${Date.now()}.pdf`;
+
+      const headerRow = originalData[0] || [];
+      const colWidth  = buildColWidth(headerRow);
+      const margin    = 6;
+      const footerY   = 201;
+      const rowHeight = 6;
+
+      const writeHeader = (yPos) => {
+        headerRow.forEach((h,i)=>{
+          const x = margin + colWidth.slice(0,i).reduce((a,b)=>a+b,0);
+          doc.rect(x, yPos, colWidth[i], rowHeight);
+          doc.text(h, x+1, yPos+4.5);
+        });
+      };
+
+      doc.setFontSize(14);
+      doc.text(title, margin, 12);
+      doc.setFontSize(10);
+      let y = 18;
+      writeHeader(y);
+      y += rowHeight;
+
+      filteredData.slice(1).forEach(r=>{
+        let maxLines = 1;
+        r.forEach((c,i)=>{
+          const lines = doc.splitTextToSize(String(c??''), colWidth[i]-1);
+          maxLines = Math.max(maxLines, lines.length);
+        });
+        const rowH = Math.max(20, maxLines*6.2+1);
+
+        if(y + rowH > footerY - 8){
+          doc.setFontSize(9);
+          doc.text('German Sparkassenstiftung - Perbarindo DPD Jateng | Website Design & Development by Heru PheWhe',
+                   297/2, footerY, {align:'center'});
+          doc.addPage();
+          y = 12;
+          writeHeader(y);
+          y += rowHeight;
+        }
+
+        r.forEach((c,i)=>{
+          const x = margin + colWidth.slice(0,i).reduce((a,b)=>a+b,0);
+          const lines = doc.splitTextToSize(String(c??''), colWidth[i]-1);
+          doc.rect(x, y, colWidth[i], rowH);
+          doc.text(lines, x+1, y+3.5);
+        });
+        y += rowH;
+      });
+
+      doc.setFontSize(9);
+      doc.text('German Sparkassenstiftung - Perbarindo DPD Jateng | Website Design & Development by Heru PheWhe',
+               297/2, footerY, {align:'center'});
+      doc.save(fileName);
+    }
+
+    const script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload=()=>$('pdfBtn').addEventListener('click',downloadPDF);
+    document.head.appendChild(script);
+
+    $('toTop').onclick   =()=> document.querySelector('.table-wrapper').scrollTop = 0;
+    $('toBottom').onclick=()=>{
+      const wrap=document.querySelector('.table-wrapper');
+      wrap.scrollTop=wrap.scrollHeight;
+    };
+
+    fetchData();
+    setInterval(fetchData,15000);
+  </script>
 </body>
 </html>
-
-
-
-
-
