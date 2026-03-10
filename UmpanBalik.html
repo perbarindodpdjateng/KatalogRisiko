@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Umpan Balik</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      padding: 2px;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 10px auto;
+      padding: 2px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 12px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin: 8px 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 2px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 2px 2px;
+      border-radius: 5px;
+      font-size: 13px;
+      margin-top: 12px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background-color: #007bff;
+      width: 0%;
+      transition: width 0.3s ease;
+      margin-top: 8px;
+      border-radius: 2px;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .message.success {
+      color: green;
+    }
+
+    .message.error {
+      color: red;
+    }
+
+    /* Mobile View */
+    @media (max-width: 480px) {
+      body {
+        padding: 2px;
+        font-size: 12px;
+      }
+      .container {
+        padding: 2px;
+        margin: 6px;
+        border-radius: 6px;
+      }
+      h2 {
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+      input[type="text"],
+      textarea,
+      select {
+        padding: 2px;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+      button {
+        padding: 2px 2px;
+        font-size: 12px;
+      }
+      .message {
+        font-size: 12px;
+      }
+    }
+
+    /* Landscape View */
+    @media (max-width: 812px) and (orientation: landscape) {
+      body {
+        padding: 2px;
+        font-size: 12px;
+      }
+      .container {
+        max-width: 100%;
+        margin: 4px;
+        padding: 2px;
+        border-radius: 5px;
+      }
+      h2 {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      input[type="text"],
+      textarea,
+      select {
+        font-size: 12px;
+        padding: 2px;
+        margin-bottom: 4px;
+      }
+      button {
+        padding: 2x 2px;
+        font-size: 12px;
+      }
+      .message {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Berikan Umpan Balik</h2>
+    <form id="feedbackForm">
+      <label for="nama">Nama</label>
+      <input type="text" id="nama" name="nama" required />
+
+      <label for="komentar">Komentar</label>
+      <textarea id="komentar" name="komentar" required></textarea>
+
+      <label for="apresiasi">Apresiasi</label>
+      <select id="apresiasi" name="apresiasi" required>
+        <option value="">-- Pilih --</option>
+        <option value="👍">👍</option>
+        <option value="👎">👎</option>
+      </select>
+
+      <button type="submit">Kirim</button>
+      <div class="progress-bar" id="progressBar"></div>
+      <div id="message" class="message"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("feedbackForm");
+    const progressBar = document.getElementById("progressBar");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      message.style.display = "none";
+      progressBar.style.width = "0%";
+
+      const data = {
+        nama: document.getElementById("nama").value,
+        komentar: document.getElementById("komentar").value,
+        apresiasi: document.getElementById("apresiasi").value
+      };
+
+      // Animasi progress bar
+      let progress = 0;
+      const interval = setInterval(() => {
+        if (progress >= 80) clearInterval(interval);
+        else {
+          progress += 4;
+          progressBar.style.width = progress + "%";
+        }
+      }, 80);
+
+      fetch("https://script.google.com/macros/s/AKfycbwntUePHp0QkDVAFlFjCEwg5xJpjq4KV0NCPXoTazZ9xVV7EkMYT-WaI6m-Z4w2xdOHuQ/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+      .then(res => res.text())
+      .then(text => {
+        clearInterval(interval);
+        progressBar.style.width = "100%";
+        message.className = "message success";
+        message.textContent = "🎉 Terima kasih! Umpan balik berhasil dikirim.";
+        message.style.display = "block";
+        form.reset();
+        setTimeout(() => progressBar.style.width = "0%", 2000);
+      })
+      .catch(err => {
+        clearInterval(interval);
+        message.className = "message error";
+        message.textContent = "❗ Gagal mengirim. Silakan coba lagi.";
+        message.style.display = "block";
+        progressBar.style.width = "0%";
+      });
+    });
+  </script>
+</body>
+</html>
