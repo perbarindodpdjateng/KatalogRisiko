@@ -1,4 +1,90 @@
-<!doctypehtml><html lang=id><meta charset=UTF-8><title>Infografis Horizontal – Statistik Divisi</title><meta content="width=device-width,initial-scale=1"name=viewport><style>:root{--bg:#121212;--card:#1e1e1e;--text:#e4e6eb;--accent:#ff8fa3;--shadow:0 4px 10px rgba(0,0,0,.3);--max-width:800px}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;padding:4px 2px;overflow-x:hidden;min-height:100vh}.wrapper{width:100%;max-width:var(--max-width);display:flex;flex-direction:column;align-items:center}.header-line{display:flex;align-items:center;gap:4px;margin-bottom:4px;width:100%;justify-content:center}h1{font-size:13px;font-weight:600}.total-box{background:var(--card);border:1.5px solid var(--accent);border-radius:3px;padding:3px 5px;box-shadow:var(--shadow);text-align:center}.total-box p{margin:0;font-size:15px;font-weight:700;color:var(--accent);line-height:1}.chart-container{width:100%;background:var(--card);border-radius:0;padding:3px 0;box-shadow:var(--shadow)}</style><div class=wrapper><div class=header-line><h1>Total Infografis</h1><div class=total-box><p id=totalValue>0</div></div><div class=chart-container><canvas id=myChart></canvas></div></div><script defer src=https://cdn.jsdelivr.net/npm/chart.js></script><script defer src=https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2></script><script>const sheetID = '1TxF6ODMFdQe-rgtTMG3re8u_aO2CuxpCLXBdjJ8-MDE';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Infografis Horizontal – Statistik Divisi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    :root {
+      --bg: #121212;
+      --card: #1e1e1e;
+      --text: #e4e6eb;
+      --accent: #ff8fa3;
+      --shadow: 0 4px 10px rgba(0,0,0,.3);
+      --max-width: 800px; /* Batas maksimal lebar konten */
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Sentralisasi horizontal */
+      padding: 4px 2px;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    .wrapper {
+      width: 100%;
+      max-width: var(--max-width); /* Batas maksimal lebar */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 4px;
+      width: 100%;
+      justify-content: center;
+    }
+    h1 { font-size: 13px; font-weight: 600; }
+    .total-box {
+      background: var(--card);
+      border: 1.5px solid var(--accent);
+      border-radius: 3px;
+      padding: 3px 5px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .total-box p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .chart-container {
+      width: 100%; /* Mengikuti lebar wrapper */
+      background: var(--card);
+      border-radius: 0;
+      padding: 3px 0;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <div class="header-line">
+      <h1>Total Infografis</h1>
+      <div class="total-box">
+        <p id="totalValue">0</p>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2" defer></script>
+  <script>
+    const sheetID = '1TxF6ODMFdQe-rgtTMG3re8u_aO2CuxpCLXBdjJ8-MDE';
     const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
     (async () => {
@@ -81,4 +167,8 @@
           }
         }
       });
-    })();</script>
+    })();
+  </script>
+
+</body>
+</html>
