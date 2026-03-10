@@ -1,0 +1,84 @@
+<!doctypehtml><html lang=id><meta charset=UTF-8><title>Infografis Horizontal – Statistik Divisi</title><meta content="width=device-width,initial-scale=1"name=viewport><style>:root{--bg:#121212;--card:#1e1e1e;--text:#e4e6eb;--accent:#ff8fa3;--shadow:0 4px 10px rgba(0,0,0,.3);--max-width:800px}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;padding:4px 2px;overflow-x:hidden;min-height:100vh}.wrapper{width:100%;max-width:var(--max-width);display:flex;flex-direction:column;align-items:center}.header-line{display:flex;align-items:center;gap:4px;margin-bottom:4px;width:100%;justify-content:center}h1{font-size:13px;font-weight:600}.total-box{background:var(--card);border:1.5px solid var(--accent);border-radius:3px;padding:3px 5px;box-shadow:var(--shadow);text-align:center}.total-box p{margin:0;font-size:15px;font-weight:700;color:var(--accent);line-height:1}.chart-container{width:100%;background:var(--card);border-radius:0;padding:3px 0;box-shadow:var(--shadow)}</style><div class=wrapper><div class=header-line><h1>Total Infografis</h1><div class=total-box><p id=totalValue>0</div></div><div class=chart-container><canvas id=myChart></canvas></div></div><script defer src=https://cdn.jsdelivr.net/npm/chart.js></script><script defer src=https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2></script><script>const sheetID = '1TxF6ODMFdQe-rgtTMG3re8u_aO2CuxpCLXBdjJ8-MDE';
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+    (async () => {
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.substr(47).slice(0, -2));
+      const rows = json.table.rows;
+
+      const labels = [];
+      const data   = [];
+      const colors = [
+        '#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#FF6384','#C9CBCF'
+      ];
+
+      rows.forEach(r => {
+        const divisi = r.c[0]?.v || '';
+        const jumlah = r.c[1]?.v || 0;
+        if (divisi && jumlah) {
+          labels.push(divisi.replace('🟡','').replace('▌','').trim());
+          data.push(jumlah);
+        }
+      });
+
+      const total = data.reduce((s,v)=>s+v,0);
+      document.getElementById('totalValue').textContent = total;
+
+      const barHeight = 6;
+      const padExtra  = 4;
+      const dynamicH  = Math.max(240, labels.length * barHeight + padExtra);
+
+      const canvas = document.getElementById('myChart');
+      canvas.height = dynamicH;
+
+      Chart.register(ChartDataLabels);
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah',
+            data: data,
+            backgroundColor: colors,
+            borderRadius: 0,
+            barThickness: barHeight - 2
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: { padding: { right: 12 } },
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'German Sparkassenstiftung – Perbarindo Jateng',
+              color: '#ffffff',
+              font: { size: 7.5, weight: 'normal' },
+              padding: { top: 0, bottom: 4 }
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'right',
+              offset: 1,
+              color: '#ffffff',
+              font: { size: 7, weight: 'bold' },
+              formatter: v => v
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { stepSize: 100, color: '#ffffff', font: { size: 7 } },
+              grid: { color: 'rgba(255,255,255,0.15)', drawBorder: false }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: '#ffffff', font: { size: 7 }, padding: 2 }
+            }
+          }
+        }
+      });
+    })();</script>
