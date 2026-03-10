@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rekap Peserta Marquee</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2px;
+      background-color: transparent;
+      color: #000;
+    }
+    .table-wrapper {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      margin-top: 2px;
+      overflow: hidden;
+      height: 650px;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+    }
+    th {
+      background: linear-gradient(to right, #4a90e2, #007bff);
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 7px;
+      letter-spacing: 0.5px;
+    }
+    tr:nth-child(even) td {
+      background-color: #f9f9f9;
+    }
+    tr:hover td {
+      background-color: #eef4ff;
+    }
+    td, th {
+      padding: 2px 2px;
+      border: 1px solid #ddd;
+    }
+    #controls {
+      margin-bottom: 2px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+      justify-content: start;
+    }
+    input[type="text"] {
+      padding: 2px;
+      font-size: 8px;
+    }
+    button {
+      font-size: 7px;
+      padding: 2px 2px;
+      cursor: pointer;
+    }
+    #rowCount {
+      font-size: 7px;
+      margin-left: 2px;
+    }
+    @keyframes slideUp {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+    tr.fade-out {
+      animation: slideUp 1s ease forwards;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 7px;
+        padding: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <input type="text" id="searchInput" placeholder="Cari..." />
+    <button onclick="exportCSV()">CSV</button>
+    <button onclick="exportXLS()">XLS</button>
+    <button onclick="toggleMarquee()" id="marqueeBtn">⏸</button>
+    <span id="rowCount">(0)</span>
+  </div>
+
+  <div class="table-wrapper">
+    <table id="dataTable"></table>
+  </div>
+
+  <script>
+    let previousData = '';
+    let originalData = [];
+    let scrollEnabled = true;
+    let scrollPaused = false;
+
+    async function fetchData() {
+      try {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbwpwudY2m-69QiPEjhpKCIQvLTfhaPe3dnQ9zj8NKUd-TMNOEUVSYbWZcNAQgUx5NKX/exec', { cache: 'no-store' });
+        const data = await res.json();
+        const dataStr = JSON.stringify(data);
+        if (dataStr !== previousData) {
+          previousData = dataStr;
+          originalData = data;
+          renderTable(data);
+        }
+      } catch (e) {
+        console.error("Gagal memuat:", e);
+      }
+    }
+
+    function renderTable(data) {
+      const table = document.getElementById("dataTable");
+      let html = '';
+      data.forEach((row, i) => {
+        html += `<tr>`;
+        row.forEach(cell => {
+          const tag = i === 0 ? 'th' : 'td';
+          if (typeof cell === "string" && cell.startsWith("http")) {
+            html += `<${tag}><a href="${cell}" target="_blank">Unduh</a></${tag}>`;
+          } else {
+            html += `<${tag}>${cell}</${tag}>`;
+          }
+        });
+        html += '</tr>';
+      });
+      table.innerHTML = html;
+      updateRowCount(data);
+    }
+
+    function updateRowCount(data) {
+      const count = data.length - 1;
+      document.getElementById("rowCount").textContent = `(${count})`;
+    }
+
+    function rollingMarquee() {
+      const table = document.getElementById("dataTable");
+      const firstRow = table.rows[1];
+      if (!firstRow || !scrollEnabled || scrollPaused) return;
+      firstRow.classList.add("fade-out");
+      setTimeout(() => {
+        table.deleteRow(1);
+        table.appendChild(firstRow);
+        firstRow.classList.remove("fade-out");
+      }, 1000);
+    }
+
+    function toggleMarquee() {
+      scrollPaused = !scrollPaused;
+      document.getElementById("marqueeBtn").textContent = scrollPaused ? "▶️" : "⏸";
+    }
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const keyword = this.value.toLowerCase();
+      const filtered = originalData.filter((row, index) =>
+        index === 0 || row.some(cell => String(cell).toLowerCase().includes(keyword))
+      );
+      renderTable(filtered);
+    });
+
+    function exportCSV() {
+      const rows = originalData.map(r => r.join(',')).join('\n');
+      const blob = new Blob([rows], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rekap.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportXLS() {
+      let html = '<table>';
+      originalData.forEach(r => {
+        html += '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>';
+      });
+      html += '</table>';
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rekap.xls';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    fetchData();
+    setInterval(fetchData, 10000);
+    setInterval(rollingMarquee, 5000);
+  </script>
+</body>
+</html>
