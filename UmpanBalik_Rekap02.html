@@ -70,25 +70,6 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,.12);
     }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 11px;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-      white-space: nowrap;
-    }
-    .btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .btn.primary:hover { background: #1d4ed8; }
 
     .badge {
       background: var(--badge-bg);
@@ -271,13 +252,6 @@
       <input type="text" id="searchInput" placeholder="Cari peserta…" />
     </div>
 
-    <button class="btn" onclick="exportCSV()">
-      ↓ CSV
-    </button>
-    <button class="btn" onclick="exportXLS()">
-      ↓ XLS
-    </button>
-
     <span class="badge" id="rowCount">0 peserta</span>
     <span class="refresh-dot" title="Auto-refresh aktif"></span>
   </div>
@@ -300,7 +274,7 @@
 
 <script>
   const API_URL = 'https://script.google.com/macros/s/AKfycbwpwudY2m-69QiPEjhpKCIQvLTfhaPe3dnQ9zj8NKUd-TMNOEUVSYbWZcNAQgUx5NKX/exec';
-  const ROWS_PER_PAGE = 4;
+  const ROWS_PER_PAGE = 5;
 
   let allData   = [];   // raw rows (header row excluded)
   let headers   = [];
@@ -421,30 +395,6 @@
 
   /* ── SEARCH ── */
   document.getElementById('searchInput').addEventListener('input', applyFilter);
-
-  /* ── EXPORT ── */
-  function exportCSV() {
-    const head = headers.join(',');
-    const rows = allData.map(r => r.join(',')).join('\n');
-    download('rekap.csv', head + '\n' + rows, 'text/csv');
-  }
-
-  function exportXLS() {
-    let html = '<table><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
-    allData.forEach(r => {
-      html += '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>';
-    });
-    html += '</table>';
-    download('rekap.xls', html, 'application/vnd.ms-excel');
-  }
-
-  function download(name, content, type) {
-    const blob = new Blob([content], { type });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = name; a.click();
-    URL.revokeObjectURL(url);
-  }
 
   /* ── INIT ── */
   fetchData();
