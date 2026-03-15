@@ -1,1 +1,445 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rekap Peserta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-light: #eff6ff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --accent: #0ea5e9;
+      --row-hover: #f0f7ff;
+      --badge-bg: #e0f2fe;
+      --badge-color: #0369a1;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 160px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 6px 10px 6px 30px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-wrap input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 11px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn.primary:hover { background: #1d4ed8; }
+
+    .badge {
+      background: var(--badge-bg);
+      color: var(--badge-color);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* ── TABLE CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    }
+    thead th {
+      padding: 8px 10px;
+      text-align: left;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+      white-space: nowrap;
+      border-bottom: 2px solid rgba(255,255,255,.1);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--row-hover); }
+    tbody tr:nth-child(even) { background: #fafbfe; }
+    tbody tr:nth-child(even):hover { background: var(--row-hover); }
+
+    /* NEW badge on first row */
+    tbody tr:first-child td:first-child::before {
+      content: 'NEW';
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    td {
+      padding: 7px 10px;
+      font-size: 11px;
+      color: var(--text);
+      white-space: nowrap;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    td a {
+      color: var(--primary);
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    td a:hover { text-decoration: underline; }
+
+    /* empty state */
+    .empty-row td {
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: #fafbfe;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .page-info {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .page-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    .page-btn {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+    .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .page-btn:disabled { opacity: .35; cursor: default; }
+
+    /* ── REFRESH DOT ── */
+    .refresh-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: inline-block;
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.75); }
+    }
+
+    /* ── FADE IN rows ── */
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    tbody tr { animation: fadeSlide .25s ease both; }
+  </style>
+</head>
+<body>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari peserta…" />
+    </div>
+
+    <button class="btn" onclick="exportCSV()">
+      ↓ CSV
+    </button>
+    <button class="btn" onclick="exportXLS()">
+      ↓ XLS
+    </button>
+
+    <span class="badge" id="rowCount">0 peserta</span>
+    <span class="refresh-dot" title="Auto-refresh aktif"></span>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="card">
+    <div class="table-scroll">
+      <table id="dataTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <span class="page-info" id="pageInfo">–</span>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwpwudY2m-69QiPEjhpKCIQvLTfhaPe3dnQ9zj8NKUd-TMNOEUVSYbWZcNAQgUx5NKX/exec';
+  const ROWS_PER_PAGE = 10;
+
+  let allData   = [];   // raw rows (header row excluded)
+  let headers   = [];
+  let filtered  = [];
+  let currentPage = 1;
+  let prevHash  = '';
+
+  /* ── FETCH ── */
+  async function fetchData() {
+    try {
+      const res  = await fetch(API_URL, { cache: 'no-store' });
+      const data = await res.json();
+      const hash = JSON.stringify(data);
+      if (hash === prevHash) return;
+      prevHash = hash;
+
+      headers = data[0] || [];
+      // data rows: reverse so newest input (last row in sheet) appears first
+      allData = data.slice(1).reverse();
+
+      applyFilter();
+    } catch (e) {
+      console.error('Fetch error:', e);
+    }
+  }
+
+  /* ── FILTER ── */
+  function applyFilter() {
+    const kw = document.getElementById('searchInput').value.toLowerCase().trim();
+    filtered = kw
+      ? allData.filter(row => row.some(c => String(c).toLowerCase().includes(kw)))
+      : [...allData];
+
+    currentPage = 1;
+    renderAll();
+  }
+
+  /* ── RENDER ── */
+  function renderAll() {
+    renderHeader();
+    renderBody();
+    renderPagination();
+    document.getElementById('rowCount').textContent =
+      filtered.length + ' peserta';
+  }
+
+  function renderHeader() {
+    const head = document.getElementById('tableHead');
+    head.innerHTML = '<tr>' +
+      headers.map(h => `<th>${h}</th>`).join('') +
+      '</tr>';
+  }
+
+  function renderBody() {
+    const body  = document.getElementById('tableBody');
+    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    const slice = filtered.slice(start, start + ROWS_PER_PAGE);
+
+    if (slice.length === 0) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="${headers.length || 1}">Tidak ada data ditemukan</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = slice.map(row =>
+      '<tr>' +
+      row.map(cell => {
+        if (typeof cell === 'string' && cell.startsWith('http')) {
+          return `<td><a href="${cell}" target="_blank">↓ Unduh</a></td>`;
+        }
+        return `<td title="${cell}">${cell}</td>`;
+      }).join('') +
+      '</tr>'
+    ).join('');
+  }
+
+  function renderPagination() {
+    const total = Math.ceil(filtered.length / ROWS_PER_PAGE) || 1;
+    const start = (currentPage - 1) * ROWS_PER_PAGE + 1;
+    const end   = Math.min(currentPage * ROWS_PER_PAGE, filtered.length);
+
+    document.getElementById('pageInfo').textContent =
+      filtered.length ? `${start}–${end} dari ${filtered.length}` : '0 hasil';
+
+    const container = document.getElementById('pageBtns');
+    let html = '';
+
+    // Prev
+    html += `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`;
+
+    // Page numbers (show max 5)
+    const pages = pageRange(currentPage, total);
+    pages.forEach(p => {
+      if (p === '…') {
+        html += `<button class="page-btn" disabled>…</button>`;
+      } else {
+        html += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+      }
+    });
+
+    // Next
+    html += `<button class="page-btn" ${currentPage===total?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`;
+
+    container.innerHTML = html;
+  }
+
+  function pageRange(cur, total) {
+    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    if (cur <= 4) return [1, 2, 3, 4, 5, '…', total];
+    if (cur >= total - 3) return [1, '…', total-4, total-3, total-2, total-1, total];
+    return [1, '…', cur-1, cur, cur+1, '…', total];
+  }
+
+  function goPage(p) {
+    currentPage = p;
+    renderBody();
+    renderPagination();
+  }
+
+  /* ── SEARCH ── */
+  document.getElementById('searchInput').addEventListener('input', applyFilter);
+
+  /* ── EXPORT ── */
+  function exportCSV() {
+    const head = headers.join(',');
+    const rows = allData.map(r => r.join(',')).join('\n');
+    download('rekap.csv', head + '\n' + rows, 'text/csv');
+  }
+
+  function exportXLS() {
+    let html = '<table><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+    allData.forEach(r => {
+      html += '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>';
+    });
+    html += '</table>';
+    download('rekap.xls', html, 'application/vnd.ms-excel');
+  }
+
+  function download(name, content, type) {
+    const blob = new Blob([content], { type });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /* ── INIT ── */
+  fetchData();
+  setInterval(fetchData, 10000);
+</script>
+</body>
+</html>
