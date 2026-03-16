@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Rekap Peserta</title>
+  <title>Rekap Reviewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -249,10 +249,10 @@
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input type="text" id="searchInput" placeholder="Cari peserta…" />
+      <input type="text" id="searchInput" placeholder="Cari Reviewer…" />
     </div>
 
-    <span class="badge" id="rowCount">0 peserta</span>
+    <span class="badge" id="rowCount">0 Reviewer</span>
     <span class="refresh-dot" title="Auto-refresh aktif"></span>
   </div>
 
@@ -318,7 +318,7 @@
     renderBody();
     renderPagination();
     document.getElementById('rowCount').textContent =
-      filtered.length + ' peserta';
+      filtered.length + ' Reviewer';
   }
 
   function renderHeader() {
